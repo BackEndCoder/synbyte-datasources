@@ -1,0 +1,119 @@
+<?php
+/**
+* @author Gareth Griffiths (aka synbyte) 2013
+* @link http://synbyte.com
+* @link http://github.com/synbyte
+**/
+App::uses('HttpSocket', 'Network/Http');
+App::uses('DataSource', 'Model/Datasource');
+
+class GithubSource extends DataSource {
+	/**
+	 * Construct
+	 * @param array $config 
+	 */
+	function __construct($config) {
+		parent::__construct($config);
+		$this->config = Set::merge($this->config, $config);
+		$this->Http = new HttpSocket();
+	}	
+
+	/**
+	 * List sources.
+	 * 
+	 * @param  array $data 
+	 * @return null
+	 */
+	public function listSources($data = null) {
+    	return null;
+    }
+
+    /**
+     * Calulate method
+     * 
+     * @param  Model  $model  
+     * @param  $func   
+     * @param  array  $params 
+     * @return count     
+     */
+   	public function calculate(Model $model, $func, $params = array()) {
+        return 'COUNT';
+    }
+
+    /**
+     * read method
+     * 
+     * @param  Model  $model     
+     * @param  array  $queryData 
+     * @return array
+     */
+	public function read(Model $model, $queryData = array()) {
+		$data = array();
+		$limit = !empty($queryData['limit']) ? $queryData['limit'] : 0;
+		$offset = !empty($queryData['offset']) ? $queryData['offset'] : 0;
+
+		switch($queryData['conditions']['type']) {
+			case 'user_info':
+				if(!empty($queryData['conditions']['username'])) {
+					$items = json_decode($this->Http->get($this->config['api_host'].'/users/'.$queryData['conditions']['username']), true);
+					$array=$items;
+				}
+			case 'user_activity':
+				if(!empty($queryData['conditions']['username'])) {
+					$items = json_decode($this->Http->get($this->config['api_host'].'/users/'.$queryData['conditions']['username'].'/events'), true);
+
+					$i=0;
+					foreach ($items as $item) {
+						if($i==$this->config['limit']) {
+							break;
+						}
+
+						switch($item['type']) {
+							case 'WatchEvent':
+								$array[]=array(
+									'text'=>'Starred',
+									'name'=>$item['repo']['name'],
+									'url'=>'http://github.com/'.$item['repo']['name'],
+									'created'=>$item['created_at']
+								);
+								break;
+							case 'FollowEvent':
+								$array[]=array(
+									'text'=>'Followed',
+									'name'=>$item['payload']['target']['login'],
+									'url'=>$item['payload']['target']['html_url'],
+									'created'=>$item['created_at']
+								);
+								break;
+							case 'ForkEvent':
+								$array[]=array(
+									'text'=>'Forked',
+									'name'=>$item['repo']['name'],
+									'url'=>'http://github.com/'.$item['repo']['name'],
+									'created'=>$item['created_at']
+								);
+								break;
+							case 'PushEvent':
+								$array[]=array(
+									'text'=>'Pushed to',
+									'name'=>$item['repo']['name'],
+									'url'=>'http://github.com/'.$item['repo']['name'],
+									'created'=>$item['created_at']
+								);
+								break;
+							case 'CreateEvent':
+								$array[]=array(
+									'text'=>'Created',
+									'name'=>$item['repo']['name'],
+									'url'=>'http://github.com/'.$item['repo']['name'],
+									'created'=>$item['created_at']
+								);
+								break;
+						}
+						$i++;
+					}
+				}
+		}
+        return $array;
+	}
+}
