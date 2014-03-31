@@ -47,7 +47,7 @@ class GithubSource extends DataSource {
      * @param  array  $queryData 
      * @return array
      */
-	public function read(Model $model, $queryData = array()) {
+	public function read(Model $model, $queryData = array(),$recursive = NULL) {
 		$data = array();
 		$limit = !empty($queryData['limit']) ? $queryData['limit'] : 0;
 		$offset = !empty($queryData['offset']) ? $queryData['offset'] : 0;
