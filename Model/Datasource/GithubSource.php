@@ -58,6 +58,7 @@ class GithubSource extends DataSource {
 					$items = json_decode($this->Http->get($this->config['api_host'].'/users/'.$queryData['conditions']['username']), true);
 					$array=$items;
 				}
+			break;
 			case 'user_activity':
 				if(!empty($queryData['conditions']['username'])) {
 					$items = json_decode($this->Http->get($this->config['api_host'].'/users/'.$queryData['conditions']['username'].'/events'), true);
@@ -113,6 +114,21 @@ class GithubSource extends DataSource {
 						$i++;
 					}
 				}
+			break;
+			case 'user_repos':
+				if(!empty($queryData['conditions']['username'])) {
+					$items = json_decode($this->Http->get($this->config['api_host'].'/users/'.$queryData['conditions']['username'].'/repos'), true);
+					$array=$items;
+				}
+			break;
+			case 'repo':
+				if(!empty($queryData['conditions']['username'])) {
+					if(!empty($queryData['conditions']['repo'])) {
+						$items = json_decode($this->Http->get($this->config['api_host'].'/repos/'.$queryData['conditions']['username'].'/'.$queryData['conditions']['repo']), true);
+						$array=$items;
+					}
+				}
+			break;	
 		}
         return $array;
 	}
