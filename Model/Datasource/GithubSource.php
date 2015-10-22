@@ -66,6 +66,22 @@ class GithubSource extends DataSource {
                         }
 
                         switch($item['type']) {
+                            case 'IssueCommentEvent':
+                                $array[]=array(
+                                    'text'=>'Commented on an issue at',
+                                    'name'=>$item['repo']['name'],
+                                    'url'=>'http://github.com/'.$item['repo']['name'],
+                                    'created'=>$item['created_at']
+                                );
+                                break;
+                            case 'PullRequestEvent':
+                                $array[]=array(
+                                    'text'=>'Sent a pull request to',
+                                    'name'=>$item['repo']['name'],
+                                    'url'=>'http://github.com/'.$item['repo']['name'],
+                                    'created'=>$item['created_at']
+                                );
+                                break;
                             case 'WatchEvent':
                                 $array[]=array(
                                     'text'=>'Starred',
